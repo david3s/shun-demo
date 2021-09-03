@@ -1,17 +1,45 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import useSWR from 'swr';
-
-interface Person {
-  name: string
-}
+import {Player} from "./api/players";
+import { FixedSizeList as List } from 'react-window';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 const Home: NextPage = () => {
-  const { data, mutate } = useSWR<Person>('/api/hello', fetcher);
+  const { data, mutate } = useSWR<Player[]>('/api/players', fetcher);
 
-  const personBit = (data) ? <p>{data.name}</p> : <p>LOADING...</p>;
+  const personBit = (data) ? <p>{data[0].nameGiven}</p> : <p>LOADING...</p>;
+
+  const Row = ({ index, style }) => {
+    if (!data) return null;
+    const player = data[index];
+    return (
+      <div style={style}>
+        {player.nameGiven}
+        &nbsp;-&nbsp;
+        {player.height}
+        &nbsp;-&nbsp;
+        {player.weight}
+        &nbsp;-&nbsp;
+        {player.debut}
+        &nbsp;-&nbsp;
+        {player.birthCity}
+        &nbsp;-&nbsp;
+        {player.birthState}
+      </div>
+    )
+  }
+
+  const playerList = (data) ?
+    <List
+      height={600}
+      itemCount={data.length}
+      itemSize={25}
+      width={800}
+    >
+      {Row}
+    </List> : <p>LOADING...</p>;
 
   return (
     <>
@@ -25,10 +53,11 @@ const Home: NextPage = () => {
           Shun Demo
         </h1>
       </header>
-      <main className="flex justify-center p-3">
+      <main>
         <article>
           <section className="flex justify-center p-3">
-            {personBit}
+            {/*{personBit}*/}
+            {playerList}
           </section>
         </article>
       </main>
